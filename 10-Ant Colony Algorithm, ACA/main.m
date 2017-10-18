@@ -11,7 +11,7 @@ D = zeros(n,n);
 for i = 1:n
     for j = 1:n
         if i ~= j
-            D(i,j) = sqrt(sum((citys(i,:) - citys(j,:)).^2));
+            D(i,j) = sqrt(sum((citys(i,:) - citys(j,:)).^2));%矩阵的点乘
         else
             D(i,j) = 1e-4;%对角线元素若是0会影响后续计算，因此赋一个很小的值      
         end
@@ -48,7 +48,7 @@ while iter <= iter_max %while大循环，判断是否达到最大迭代次数，没达到执行循环
           % 逐个城市路径选择
          for j = 2:n
              tabu = Table(i,1:(j - 1));           % 已访问的城市集合(禁忌表)
-             allow_index = ~ismember(citys_index,tabu);
+             allow_index = ~ismember(citys_index,tabu);%还可以访问的城市索引号，它是索引号，后一句语句就直接提取对应的数了，ismember(A,B)生成一个与A大小一致的矩阵，判断B是不A中元素，是的位置为1，其他为0，加~表示取反
              allow = citys_index(allow_index);  % 待访问的城市集合
              P = allow;
              % 计算城市间转移概率
@@ -56,11 +56,11 @@ while iter <= iter_max %while大循环，判断是否达到最大迭代次数，没达到执行循环
                  P(k) = Tau(tabu(end),allow(k))^alpha * Eta(tabu(end),allow(k))^beta;%转移概率公式
              end
              P = P/sum(P);
-             % 轮盘赌法选择下一个访问城市
-             Pc = cumsum(P);     
-            target_index = find(Pc >= rand); 
+             % 轮盘赌法选择下一个访问城市（转动轮盘时选择的扇形区域，区域越大被选择的概率越大）
+             Pc = cumsum(P);  %累加函数  
+            target_index = find(Pc >= rand); %选出下一个概率最大的城市
             target = allow(target_index(1));
-            Table(i,j) = target;
+            Table(i,j) = target;%选出下一个城市放入table
          end
       end
       % 计算各个蚂蚁的路径距离
